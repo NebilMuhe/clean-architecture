@@ -1,0 +1,4 @@
+database:
+  url: postgresql://root:@localhost:26257/userstore?sslmode=disable
+  file: file://db/migration
+  murl: cockroachdb://cockroach:@localhost:26257/userstore?sslmode=disable

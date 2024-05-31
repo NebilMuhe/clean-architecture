@@ -35,7 +35,7 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initialized service layer")
 
 	log.Info(ctx, "initializing handler layer")
-	InitHandler(service, log)
+	handler := InitHandler(service, log)
 	log.Info(ctx, "initialized handler")
 
 	log.Info(ctx, "intializing server")
@@ -43,4 +43,9 @@ func Initialize(ctx context.Context) {
 	server.Use(ginzap.RecoveryWithZap(log.GetZapLogger().Named("gin-recovery"), true))
 	server.Use(middleware.ErrorHandler())
 	log.Info(ctx, "initialized server")
+
+	log.Info(ctx, "initializing routes")
+	router := server.Group("/v1")
+	InitRoute(router, handler)
+	log.Info(ctx, "initialized routes")
 }
