@@ -28,7 +28,10 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initialized persistence layer")
 
 	log.Info(ctx, "initializing service layer")
-	InitService(persitence, log)
+	service := InitService(persitence, log)
 	log.Info(ctx, "initialized service layer")
 
+	log.Info(ctx, "initializing handler layer")
+	InitHandler(service, log)
+	log.Info(ctx, "initialized handler")
 }
