@@ -2,8 +2,11 @@ package initiator
 
 import (
 	"clean-architecture/internal/constants/dbinstance"
+	"clean-architecture/internal/handler/middleware"
 	"context"
 
+	ginzap "github.com/gin-contrib/zap"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
 
@@ -34,4 +37,10 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initializing handler layer")
 	InitHandler(service, log)
 	log.Info(ctx, "initialized handler")
+
+	log.Info(ctx, "intializing server")
+	server := gin.New()
+	server.Use(ginzap.RecoveryWithZap(log.GetZapLogger().Named("gin-recovery"), true))
+	server.Use(middleware.ErrorHandler())
+	log.Info(ctx, "initialized server")
 }
