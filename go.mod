@@ -3,13 +3,17 @@ module clean-architecture
 go 1.22.1
 
 require (
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.17.1
+	github.com/google/uuid v1.4.0
 	github.com/jackc/pgx/v5 v5.6.0
+	github.com/joomcode/errorx v1.1.1
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.27.0
 )
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
