@@ -1,0 +1,5 @@
+package initiator
+
+func InitPersistence() {
+
+}
