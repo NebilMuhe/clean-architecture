@@ -1,6 +1,10 @@
 package initiator
 
-import "context"
+import (
+	"context"
+
+	"github.com/spf13/viper"
+)
 
 func Initialize(ctx context.Context) {
 	log := InitLogger()
@@ -9,4 +13,8 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initializing configuration")
 	InitConfig(ctx, "config", "config", log)
 	log.Info(ctx, "initialized configuration")
+
+	log.Info(ctx, "initializing database")
+	InitDB(ctx, viper.GetString("database.url"), log)
+	log.Info(ctx, "initilaizied database")
 }

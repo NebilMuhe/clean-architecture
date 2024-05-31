@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func InitConfig(ctx context.Context, name, path string, log logger.Logger) {
@@ -14,6 +15,6 @@ func InitConfig(ctx context.Context, name, path string, log logger.Logger) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal(ctx, "unable to read configuration file")
+		log.Fatal(ctx, "unable to read configuration file", zap.Error(err))
 	}
 }
