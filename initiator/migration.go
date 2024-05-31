@@ -5,6 +5,9 @@ import (
 	"context"
 
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/cockroachdb"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"go.uber.org/zap"
 )
 

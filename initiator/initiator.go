@@ -4,10 +4,16 @@ import (
 	"clean-architecture/internal/constants/dbinstance"
 	"clean-architecture/internal/handler/middleware"
 	"context"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 func Initialize(ctx context.Context) {
@@ -48,4 +54,32 @@ func Initialize(ctx context.Context) {
 	router := server.Group("/v1")
 	InitRoute(router, handler)
 	log.Info(ctx, "initialized routes")
+
+	srv := http.Server{
+		Addr:    ":" + viper.GetString("server.port"),
+		Handler: server,
+	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, syscall.SIGTERM)
+
+	go func() {
+		log.Info(ctx, "started listening on server with ", zap.Int("port", viper.GetInt("port")))
+		log.Info(ctx, fmt.Sprintf("server stopped with the error %v", srv.ListenAndServe()))
+	}()
+
+	sig := <-quit
+	log.Info(ctx, fmt.Sprintf("server shutting down with signal %v", sig))
+	cntx, cancel := context.WithTimeout(ctx, viper.GetDuration("server.timeout"))
+	defer cancel()
+
+	log.Info(ctx, "shutting down server")
+	err := srv.Shutdown(cntx)
+
+	if err != nil {
+		log.Fatal(ctx, "error while shutting down server", zap.Error(err))
+	}
+
+	log.Info(ctx, "server shutdown complete")
 }
