@@ -3,5 +3,5 @@ database:
   file: file://internal/constants/db/migration
   murl: cockroachdb://root:@localhost:26257/userstore?sslmode=disable
 server:
-  port: 8080
+  port: 8000
   timeout: 30s
