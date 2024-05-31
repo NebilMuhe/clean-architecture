@@ -12,6 +12,7 @@ type Logger interface {
 	Info(ctx context.Context, msg string, fields ...zap.Field)
 	Fatal(ctx context.Context, msg string, fields ...zap.Field)
 	With(fields ...zap.Field) *zap.Logger
+	Named(name string) *logger
 	extract(ctx context.Context) []zap.Field
 }
 
@@ -41,6 +42,11 @@ func (l *logger) Fatal(ctx context.Context, msg string, fields ...zap.Field) {
 func (l *logger) With(fields ...zap.Field) *zap.Logger {
 	l2 := l.logger.With(fields...)
 	return l2
+}
+
+func (l *logger) Named(name string) *logger {
+	l2 := l.logger.Named(name)
+	return &logger{l2}
 }
 
 func (l *logger) extract(ctx context.Context) []zap.Field {

@@ -1,4 +1,4 @@
-package data
+package service
 
 import (
 	"clean-architecture/internal/constants/model/usermodel"

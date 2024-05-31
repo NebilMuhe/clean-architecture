@@ -1,6 +1,7 @@
 package initiator
 
 import (
+	"clean-architecture/internal/constants/dbinstance"
 	"context"
 
 	"github.com/spf13/viper"
@@ -15,10 +16,19 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initialized configuration")
 
 	log.Info(ctx, "initializing database")
-	InitDB(ctx, viper.GetString("database.url"), log)
+	pool := InitDB(ctx, viper.GetString("database.url"), log)
 	log.Info(ctx, "initilaizied database")
 
 	log.Info(ctx, "initializing migration")
 	InitMigration(ctx, viper.GetString("database.file"), viper.GetString("database.murl"), log)
 	log.Info(ctx, "initialized migration")
+
+	log.Info(ctx, "initializing persistence layer")
+	persitence := InitPersistence(dbinstance.New(pool), log)
+	log.Info(ctx, "initialized persistence layer")
+
+	log.Info(ctx, "initializing service layer")
+	InitService(persitence, log)
+	log.Info(ctx, "initialized service layer")
+
 }
