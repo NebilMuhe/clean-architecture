@@ -48,3 +48,26 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 
 	return user, nil
 }
+
+func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (map[string]string, error) {
+	usr, err := u.data.LoginUser(ctx, param)
+	if err != nil {
+		return nil, err
+	}
+
+	err = helpers.CheckPassword(usr.Password, param.Password)
+	if err != nil {
+		u.log.Error(ctx, "invalid password", zap.Error(err))
+		err := errors.ErrInvalidUserInput.Wrap(err, "invalid password")
+		return nil, err
+	}
+
+	token, err := helpers.CreateToken(usr.ID.String(), usr.Username)
+	if err != nil {
+		u.log.Error(ctx, "unable to create token", zap.Error(err))
+		err = errors.ErrWriteError.Wrap(err, "unable to create token")
+		return nil, err
+	}
+
+	return token, nil
+}

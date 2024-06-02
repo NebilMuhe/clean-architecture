@@ -9,6 +9,7 @@ import (
 	"clean-architecture/utils/logger"
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 )
 
@@ -43,5 +44,25 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt.Time,
 		UpdatedAt: user.UpdatedAt.Time,
+	}, nil
+}
+
+func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*usermodel.User, error) {
+	usr, err := u.db.LoginUser(ctx, param.Username)
+	if err != nil {
+		u.log.Error(ctx, "unable to login", zap.Error(err), zap.String("username", param.Username))
+		if err == pgx.ErrNoRows {
+			err = errors.ErrNoRecordFound.Wrap(err, "user does not exists")
+		} else {
+			errors.ErrReadError.Wrap(err, "unable to login")
+		}
+
+		return nil, err
+	}
+
+	return &usermodel.User{
+		ID:       usr.ID.Bytes,
+		Username: usr.Username,
+		Password: usr.Password,
 	}, nil
 }

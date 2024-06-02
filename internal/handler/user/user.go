@@ -48,3 +48,22 @@ func (u *user) CreateUser(ctx *gin.Context) {
 
 	constants.SuccessResponse(ctx, http.StatusCreated, user, nil)
 }
+
+func (u *user) LoginUser(ctx *gin.Context) {
+	var usr usermodel.LoginUser
+
+	if err := ctx.ShouldBind(&usr); err != nil {
+		u.log.Error(ctx, "unable to bind user data", zap.Error(err))
+		err := errors.ErrInvalidUserInput.Wrap(err, "invalid user input")
+		ctx.Error(err)
+		return
+	}
+
+	res, err := u.service.LoginUser(ctx, usr)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	constants.SuccessResponse(ctx, http.StatusOK, res, nil)
+}
