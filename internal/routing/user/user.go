@@ -12,6 +12,7 @@ func InitRoute(grp *gin.RouterGroup, user handler.User) {
 	users := grp.Group("users")
 	userRoutes := []routing.Router{
 		{
+			Path:    "/register",
 			Method:  http.MethodPost,
 			Handler: user.CreateUser,
 		},

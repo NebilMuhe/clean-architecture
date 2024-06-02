@@ -1,12 +1,12 @@
 package user
 
 import (
+	"clean-architecture/internal/constants"
 	"clean-architecture/internal/constants/errors"
 	"clean-architecture/internal/constants/model/usermodel"
 	"clean-architecture/internal/handler"
 	"clean-architecture/internal/service"
 	"clean-architecture/utils/logger"
-	"context"
 	"net/http"
 	"time"
 
@@ -28,23 +28,23 @@ func Init(service service.User, log logger.Logger, timeout time.Duration) handle
 }
 
 func (u *user) CreateUser(ctx *gin.Context) {
-	contx, cancel := context.WithTimeout(ctx, u.timeout)
-	defer cancel()
+	// contx, cancel := context.WithTimeout(ctx, u.timeout)
+	// defer cancel()
 
 	var usr usermodel.RegisterUser
 
-	if err := ctx.ShouldBind(usr); err != nil {
+	if err := ctx.ShouldBind(&usr); err != nil {
 		u.log.Error(ctx, "unable to bind user data", zap.Error(err))
 		err := errors.ErrInvalidUserInput.Wrap(err, "invalid user input")
 		ctx.Error(err)
 		return
 	}
 
-	user, err := u.service.CreateUser(contx, usr)
+	user, err := u.service.CreateUser(ctx, usr)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	constants.SuccessResponse(ctx, http.StatusCreated, user, nil)
 }

@@ -64,8 +64,9 @@ func CastErrorResponse(err error) *model.ErrorResponse {
 		}
 	} else {
 		response = model.ErrorResponse{
-			Code:    code,
-			Message: er.Message(),
+			Code:       code,
+			Message:    er.Message(),
+			FieldError: ErrorFields(er.Cause()),
 		}
 	}
 

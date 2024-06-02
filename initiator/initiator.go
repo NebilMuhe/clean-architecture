@@ -65,7 +65,7 @@ func Initialize(ctx context.Context) {
 	signal.Notify(quit, syscall.SIGTERM)
 
 	go func() {
-		log.Info(ctx, "started listening on server with ", zap.Int("port", viper.GetInt("port")))
+		log.Info(ctx, "started listening on server with ", zap.Int("port", viper.GetInt("server.port")))
 		log.Info(ctx, fmt.Sprintf("server stopped with the error %v", srv.ListenAndServe()))
 	}()
 

@@ -13,6 +13,6 @@ type Handler struct {
 
 func InitHandler(service Service, log logger.Logger) Handler {
 	return Handler{
-		handler: user.Init(service.user, log.Named("handler-layer"), time.Second*7),
+		handler: user.Init(service.user, log.Named("handler-layer"), time.Minute*1),
 	}
 }

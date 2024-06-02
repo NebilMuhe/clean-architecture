@@ -5,11 +5,12 @@ import (
 	"clean-architecture/internal/constants/model/usermodel"
 	"clean-architecture/internal/data"
 	"clean-architecture/internal/service"
+	"clean-architecture/utils/helpers"
 	"clean-architecture/utils/logger"
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type user struct {
@@ -29,7 +30,7 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 		return nil, err
 	}
 
-	password, err := HashPassword(param.Password)
+	password, err := helpers.HashPassword(param.Password)
 	if err != nil {
 		u.log.Error(ctx, "unable to hash password", zap.Error(err))
 		err := errors.ErrWriteError.Wrap(err, "unable to hash password")
@@ -43,10 +44,7 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 		return nil, err
 	}
 
-	return user, nil
-}
+	fmt.Println("user", user)
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+	return user, nil
 }
