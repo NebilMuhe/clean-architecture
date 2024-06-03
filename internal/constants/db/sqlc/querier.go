@@ -9,8 +9,10 @@ import (
 )
 
 type Querier interface {
+	CheckUserExists(ctx context.Context, arg CheckUserExistsParams) (bool, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteRefreshToken(ctx context.Context, username string) (Session, error)
 	GetToken(ctx context.Context, username string) (Session, error)
 	LoginUser(ctx context.Context, username string) (User, error)
 }

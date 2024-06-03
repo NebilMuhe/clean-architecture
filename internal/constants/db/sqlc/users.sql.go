@@ -9,6 +9,27 @@ import (
 	"context"
 )
 
+const checkUserExists = `-- name: CheckUserExists :one
+SELECT EXISTS(
+SELECT id, username, email, password, created_at, updated_at, deleted_at
+FROM users
+WHERE username = $1 OR email = $2
+LIMIT 1
+)
+`
+
+type CheckUserExistsParams struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (q *Queries) CheckUserExists(ctx context.Context, arg CheckUserExistsParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkUserExists, arg.Username, arg.Email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createSession = `-- name: CreateSession :one
 INSERT INTO sessions (
   username,
@@ -68,10 +89,30 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteRefreshToken = `-- name: DeleteRefreshToken :one
+UPDATE sessions 
+SET deleted_at = NOW() 
+WHERE username = $1
+RETURNING id, username, refresh_token, created_at, deleted_at
+`
+
+func (q *Queries) DeleteRefreshToken(ctx context.Context, username string) (Session, error) {
+	row := q.db.QueryRow(ctx, deleteRefreshToken, username)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.RefreshToken,
+		&i.CreatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getToken = `-- name: GetToken :one
 SELECT id, username, refresh_token, created_at, deleted_at
 FROM sessions
-WHERE username = $1
+WHERE username = $1 and deleted_at ISNULL
 LIMIT 1
 `
 

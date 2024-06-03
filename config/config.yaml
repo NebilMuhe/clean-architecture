@@ -5,3 +5,4 @@ database:
 server:
   port: 8000
   timeout: 30s
+secret_key: encryptpasswordd

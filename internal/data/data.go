@@ -10,4 +10,6 @@ type User interface {
 	LoginUser(ctx context.Context, param usermodel.LoginUser) (*usermodel.User, error)
 	RefreshToken(ctx context.Context, username string, refToken string) (*usermodel.RefreshToken, error)
 	GetRefreshToken(ctx context.Context, username string) (string, error)
+	IsUserExists(ctx context.Context, username, email string) (bool, error)
+	DeleteRefreshToken(ctx context.Context, username string) (*usermodel.User, error)
 }

@@ -54,7 +54,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 		if err == pgx.ErrNoRows {
 			err = errors.ErrNoRecordFound.Wrap(err, "user does not exists")
 		} else {
-			errors.ErrReadError.Wrap(err, "unable to login")
+			err = errors.ErrReadError.Wrap(err, "unable to login")
 		}
 
 		return nil, err
@@ -95,4 +95,31 @@ func (u *user) GetRefreshToken(ctx context.Context, username string) (string, er
 	}
 
 	return session.RefreshToken, nil
+}
+
+func (u *user) IsUserExists(ctx context.Context, username string, email string) (bool, error) {
+	arg := db.CheckUserExistsParams{
+		Username: username,
+		Email:    email,
+	}
+	isExist, err := u.db.CheckUserExists(ctx, arg)
+	if err != nil {
+		u.log.Error(ctx, "unable to read", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
+		return isExist, err
+	}
+	return isExist, nil
+}
+
+func (u *user) DeleteRefreshToken(ctx context.Context, username string) (*usermodel.User, error) {
+	usr, err := u.db.DeleteRefreshToken(ctx, username)
+	if err != nil {
+		u.log.Error(ctx, "unable to delete", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
+		return nil, err
+	}
+	return &usermodel.User{
+		ID:       usr.ID.Bytes,
+		Username: usr.Username,
+	}, nil
 }

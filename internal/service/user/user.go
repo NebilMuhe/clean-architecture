@@ -8,7 +8,6 @@ import (
 	"clean-architecture/utils/helpers"
 	"clean-architecture/utils/logger"
 	"context"
-	"fmt"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -31,6 +30,17 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 		return nil, err
 	}
 
+	isExist, err := u.data.IsUserExists(ctx, param.Username, param.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if isExist {
+		err := errors.ErrDataExists.New("user already exists")
+		u.log.Error(ctx, "user already exists", zap.Error(err))
+		return nil, err
+	}
+
 	password, err := helpers.HashPassword(ctx, param.Password, u.log)
 	if err != nil {
 		return nil, err
@@ -42,13 +52,14 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("user", user)
-
 	return user, nil
 }
 
 func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*usermodel.Token, error) {
+	if err := param.Validate(ctx, u.log); err != nil {
+		return nil, err
+	}
+
 	usr, err := u.data.LoginUser(ctx, param)
 	if err != nil {
 		return nil, err
@@ -85,8 +96,6 @@ func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel
 
 	res, err := helpers.ExtractUsernameAndID(ctx, tokenString, u.log)
 	if err != nil {
-		u.log.Error(ctx, "unable to extract username and id", zap.Error(err))
-		err := errors.ErrReadError.Wrap(err, "unable to read")
 		return nil, err
 	}
 
@@ -106,10 +115,13 @@ func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel
 		return nil, err
 	}
 
+	_, err = u.data.DeleteRefreshToken(ctx, res["username"])
+	if err != nil {
+		return nil, err
+	}
+
 	token, err := helpers.CreateToken(ctx, res["id"], res["username"], u.log)
 	if err != nil {
-		u.log.Error(ctx, "unable to create token", zap.Error(err))
-		err = errors.ErrWriteError.Wrap(err, "unable to create token")
 		return nil, err
 	}
 

@@ -159,7 +159,7 @@ func Encrypt(ctx context.Context, key []byte, token string, log logger.Logger) (
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		log.Error(ctx, "unable to create cipher", zap.Error(err))
-		err := errors.ErrUnableToCreate.Wrap(err, "unable to create cipher")
+		err := errors.ErrUnableToCreate.Wrap(err, "internal server error")
 		return "", err
 	}
 
@@ -167,7 +167,7 @@ func Encrypt(ctx context.Context, key []byte, token string, log logger.Logger) (
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		log.Error(ctx, "unable to read", zap.Error(err))
-		err := errors.ErrReadError.Wrap(err, "unable to read")
+		err := errors.ErrReadError.Wrap(err, "internal server error")
 		return "", err
 	}
 
