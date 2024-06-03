@@ -9,6 +9,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"time"
 
@@ -18,8 +19,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password string) (string, error) {
+func HashPassword(ctx context.Context, password string, log logger.Logger) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		log.Error(ctx, "unable to hash password", zap.Error(err))
+		err := errors.ErrWriteError.Wrap(err, "unable to hash password")
+		return "", err
+	}
 	return string(bytes), err
 }
 
@@ -90,24 +96,31 @@ func GenerateRefreshToken(id, username string) (string, error) {
 	return rt, nil
 }
 
-func VerifyToken(tokenString string) error {
+func VerifyToken(ctx context.Context, tokenString string, log logger.Logger) error {
 	secretKey := []byte(viper.GetString("SECRET_KEY"))
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return secretKey, nil
 	})
 
 	if err != nil {
+		log.Error(ctx, "invalid token", zap.Error(err))
+		err := errors.ErrBadRequest.Wrap(err, "bad request")
 		return err
 	}
 
-	if !token.Valid {
+	if _, ok := token.Claims.(jwt.MapClaims); !ok && !token.Valid {
+		err := errors.ErrBadRequest.New("invalid token")
+		log.Error(ctx, "invalid token", zap.Error(err))
 		return err
 	}
 
 	return nil
 }
 
-func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
+func ExtractUsernameAndID(ctx context.Context, tokenString string, log logger.Logger) (map[string]string, error) {
 	secretKey := []byte(viper.GetString("secret_key"))
 	var err error
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -119,6 +132,8 @@ func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
 	})
 
 	if err != nil {
+		log.Error(ctx, "invalid token", zap.Error(err))
+		err := errors.ErrBadRequest.Wrap(err, "bad request")
 		return nil, err
 	}
 
@@ -131,6 +146,8 @@ func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
 				username = claims["username"].(string)
 			}
 		} else {
+			err := errors.ErrBadRequest.New("invalid token")
+			log.Error(ctx, "invalid token", zap.Error(err))
 			return nil, err
 		}
 	}
@@ -138,15 +155,19 @@ func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
 	return map[string]string{"id": id, "username": username}, nil
 }
 
-func Encrypt(key []byte, token string) (string, error) {
+func Encrypt(ctx context.Context, key []byte, token string, log logger.Logger) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		log.Error(ctx, "unable to create cipher", zap.Error(err))
+		err := errors.ErrUnableToCreate.Wrap(err, "unable to create cipher")
 		return "", err
 	}
 
 	ciphertext := make([]byte, aes.BlockSize+len(token))
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		log.Error(ctx, "unable to read", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
 		return "", err
 	}
 
@@ -156,18 +177,24 @@ func Encrypt(key []byte, token string) (string, error) {
 	return base64.URLEncoding.EncodeToString(ciphertext), nil
 }
 
-func Decrypt(key []byte, token string) (string, error) {
+func Decrypt(ctx context.Context, key []byte, token string, log logger.Logger) (string, error) {
 	ciphertext, err := base64.URLEncoding.DecodeString(token)
 	if err != nil {
+		log.Error(ctx, "unable to decode", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
 		return "", err
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		log.Error(ctx, "unable to create cipher", zap.Error(err))
+		err := errors.ErrUnableToCreate.Wrap(err, "unable to create cipher")
 		return "", err
 	}
 
 	if len(ciphertext) < aes.BlockSize {
+		err := errors.ErrBadRequest.New("bad request")
+		log.Error(ctx, "cipher text less than block size", zap.Error(err))
 		return "", err
 	}
 	iv := ciphertext[:aes.BlockSize]

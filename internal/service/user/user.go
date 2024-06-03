@@ -31,10 +31,8 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 		return nil, err
 	}
 
-	password, err := helpers.HashPassword(param.Password)
+	password, err := helpers.HashPassword(ctx, param.Password, u.log)
 	if err != nil {
-		u.log.Error(ctx, "unable to hash password", zap.Error(err))
-		err := errors.ErrWriteError.Wrap(err, "unable to hash password")
 		return nil, err
 	}
 
@@ -66,7 +64,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 		return nil, err
 	}
 
-	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token.RefreshToken)
+	rfEncrypted, err := helpers.Encrypt(ctx, []byte(viper.GetString("secret_key")), token.RefreshToken, u.log)
 	if err != nil {
 		return nil, err
 	}
@@ -80,14 +78,12 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 }
 
 func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel.Token, error) {
-	err := helpers.VerifyToken(tokenString)
+	err := helpers.VerifyToken(ctx, tokenString, u.log)
 	if err != nil {
-		u.log.Error(ctx, "invalid token", zap.Error(err))
-		err := errors.ErrInvalidUserInput.Wrap(err, "invalid token")
 		return nil, err
 	}
 
-	res, err := helpers.ExtractUsernameAndID(tokenString)
+	res, err := helpers.ExtractUsernameAndID(ctx, tokenString, u.log)
 	if err != nil {
 		u.log.Error(ctx, "unable to extract username and id", zap.Error(err))
 		err := errors.ErrReadError.Wrap(err, "unable to read")
@@ -99,7 +95,7 @@ func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel
 		return nil, err
 	}
 
-	decrytpRfToken, err := helpers.Decrypt([]byte(viper.GetString("secret_key")), rfToken)
+	decrytpRfToken, err := helpers.Decrypt(ctx, []byte(viper.GetString("secret_key")), rfToken, u.log)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +113,7 @@ func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel
 		return nil, err
 	}
 
-	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token.RefreshToken)
+	rfEncrypted, err := helpers.Encrypt(ctx, []byte(viper.GetString("secret_key")), token.RefreshToken, u.log)
 	if err != nil {
 		return nil, err
 	}

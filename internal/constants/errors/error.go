@@ -13,6 +13,7 @@ var ErrorMap = map[*errorx.Type]int{
 	ErrWriteError:       http.StatusInternalServerError,
 	ErrNoRecordFound:    http.StatusNotFound,
 	ErrUnableToCreate:   http.StatusInternalServerError,
+	ErrBadRequest:       http.StatusBadRequest,
 }
 
 var (
@@ -21,6 +22,7 @@ var (
 	duplicate      = errorx.NewNamespace("duplicate").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
 	dataNotFound   = errorx.NewNamespace("data not found").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
 	unableToCreate = errorx.NewNamespace("unable to create").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
+	badRequest     = errorx.NewNamespace("bad request").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
 )
 
 var (
@@ -30,4 +32,5 @@ var (
 	ErrDataExists       = errorx.NewType(duplicate, "data already exists")
 	ErrNoRecordFound    = errorx.NewType(dataNotFound, "no record found")
 	ErrUnableToCreate   = errorx.NewType(unableToCreate, "unable to create")
+	ErrBadRequest       = errorx.NewType(badRequest, "bad request")
 )
