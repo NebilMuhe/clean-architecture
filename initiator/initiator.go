@@ -51,7 +51,7 @@ func Initialize(ctx context.Context) {
 	log.Info(ctx, "initialized server")
 
 	log.Info(ctx, "initializing routes")
-	router := server.Group("/v1")
+	router := server.Group("/api/v1")
 	InitRoute(router, handler)
 	log.Info(ctx, "initialized routes")
 
