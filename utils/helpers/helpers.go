@@ -1,6 +1,10 @@
 package helpers
 
 import (
+	"clean-architecture/internal/constants/errors"
+	"clean-architecture/internal/constants/model/usermodel"
+	"clean-architecture/utils/logger"
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -10,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,30 +23,35 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func CheckPassword(hash, providedPassword string) error {
+func CheckPassword(ctx context.Context, hash, providedPassword string, log logger.Logger) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(providedPassword))
 	if err != nil {
+		log.Error(ctx, "invalid password", zap.Error(err))
+		errors.ErrInvalidUserInput.Wrap(err, "invalid input")
 		return err
 	}
 	return nil
 }
 
-func CreateToken(id, username string) (map[string]string, error) {
+func CreateToken(ctx context.Context, id, username string, log logger.Logger) (*usermodel.Token, error) {
 	accessToken, err := GenerateAccessToken(id, username)
 	if err != nil {
-		// logger.Error(ctx, "unable to create access token", zap.Error(err))
-		// err = errors.ErrUnableToCreate.Wrap(err, "unable to create access token")
+		log.Error(ctx, "unable to create token", zap.Error(err))
+		err := errors.ErrUnableToCreate.Wrap(err, "unable to create token")
 		return nil, err
 	}
 
 	refreshToken, err := GenerateRefreshToken(id, username)
 	if err != nil {
-		// logger.Error(ctx, "unable to create refresh token", zap.Error(err))
-		// err = errors.ErrUnableToCreate.Wrap(err, "unable to create refresh token")
+		log.Error(ctx, "unable to create token", zap.Error(err))
+		err := errors.ErrUnableToCreate.Wrap(err, "unable to create token")
 		return nil, err
 	}
 
-	return map[string]string{"access_token": accessToken, "refresh_token": refreshToken}, nil
+	return &usermodel.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func GenerateAccessToken(id, username string) (string, error) {

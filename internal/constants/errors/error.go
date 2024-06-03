@@ -12,13 +12,15 @@ var ErrorMap = map[*errorx.Type]int{
 	ErrReadError:        http.StatusInternalServerError,
 	ErrWriteError:       http.StatusInternalServerError,
 	ErrNoRecordFound:    http.StatusNotFound,
+	ErrUnableToCreate:   http.StatusInternalServerError,
 }
 
 var (
-	invalidInput = errorx.NewNamespace("validation error").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
-	dbError      = errorx.NewNamespace("db error")
-	duplicate    = errorx.NewNamespace("duplicate").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
-	dataNotFound = errorx.NewNamespace("data not found").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
+	invalidInput   = errorx.NewNamespace("validation error").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
+	dbError        = errorx.NewNamespace("db error")
+	duplicate      = errorx.NewNamespace("duplicate").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
+	dataNotFound   = errorx.NewNamespace("data not found").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
+	unableToCreate = errorx.NewNamespace("unable to create").ApplyModifiers(errorx.TypeModifierOmitStackTrace)
 )
 
 var (
@@ -27,4 +29,5 @@ var (
 	ErrReadError        = errorx.NewType(dbError, "could not read data from db")
 	ErrDataExists       = errorx.NewType(duplicate, "data already exists")
 	ErrNoRecordFound    = errorx.NewType(dataNotFound, "no record found")
+	ErrUnableToCreate   = errorx.NewType(unableToCreate, "unable to create")
 )

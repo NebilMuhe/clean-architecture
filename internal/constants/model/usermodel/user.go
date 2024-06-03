@@ -47,6 +47,11 @@ type RefreshToken struct {
 	CreatedAt    time.Time `json:"created_at,omitempty"`
 }
 
+type Token struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 var usernameRule = []validation.Rule{
 	validation.Required.Error("username required"),
 	validation.Length(5, 20).Error("Username length must be atleast 5 characters"),

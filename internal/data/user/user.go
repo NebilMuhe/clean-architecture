@@ -85,3 +85,14 @@ func (u *user) RefreshToken(ctx context.Context, username string, refToken strin
 		CreatedAt:    session.CreatedAt.Time,
 	}, nil
 }
+
+func (u *user) GetRefreshToken(ctx context.Context, username string) (string, error) {
+	session, err := u.db.GetToken(ctx, username)
+	if err != nil {
+		u.log.Error(ctx, "unable to read", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
+		return "", err
+	}
+
+	return session.RefreshToken, nil
+}

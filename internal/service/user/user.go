@@ -50,27 +50,23 @@ func (u *user) CreateUser(ctx context.Context, param usermodel.RegisterUser) (*u
 	return user, nil
 }
 
-func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (map[string]string, error) {
+func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*usermodel.Token, error) {
 	usr, err := u.data.LoginUser(ctx, param)
 	if err != nil {
 		return nil, err
 	}
 
-	err = helpers.CheckPassword(usr.Password, param.Password)
+	err = helpers.CheckPassword(ctx, usr.Password, param.Password, u.log)
 	if err != nil {
-		u.log.Error(ctx, "invalid password", zap.Error(err))
-		err := errors.ErrInvalidUserInput.Wrap(err, "invalid password")
 		return nil, err
 	}
 
-	token, err := helpers.CreateToken(usr.ID.String(), usr.Username)
+	token, err := helpers.CreateToken(ctx, usr.ID.String(), usr.Username, u.log)
 	if err != nil {
-		u.log.Error(ctx, "unable to create token", zap.Error(err))
-		err = errors.ErrWriteError.Wrap(err, "unable to create token")
 		return nil, err
 	}
 
-	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token["refresh_token"])
+	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +79,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (map[st
 	return token, nil
 }
 
-func (u *user) RefreshToken(ctx context.Context, tokenString string) (map[string]string, error) {
+func (u *user) RefreshToken(ctx context.Context, tokenString string) (*usermodel.Token, error) {
 	err := helpers.VerifyToken(tokenString)
 	if err != nil {
 		u.log.Error(ctx, "invalid token", zap.Error(err))
@@ -98,10 +94,36 @@ func (u *user) RefreshToken(ctx context.Context, tokenString string) (map[string
 		return nil, err
 	}
 
-	token, err := helpers.CreateToken(res["id"], res["username"])
+	rfToken, err := u.data.GetRefreshToken(ctx, res["username"])
+	if err != nil {
+		return nil, err
+	}
+
+	decrytpRfToken, err := helpers.Decrypt([]byte(viper.GetString("secret_key")), rfToken)
+	if err != nil {
+		return nil, err
+	}
+
+	if decrytpRfToken != tokenString {
+		err := errors.ErrInvalidUserInput.New("invalid token")
+		u.log.Error(ctx, "invalid input", zap.Error(err))
+		return nil, err
+	}
+
+	token, err := helpers.CreateToken(ctx, res["id"], res["username"], u.log)
 	if err != nil {
 		u.log.Error(ctx, "unable to create token", zap.Error(err))
 		err = errors.ErrWriteError.Wrap(err, "unable to create token")
+		return nil, err
+	}
+
+	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = u.data.RefreshToken(ctx, res["username"], rfEncrypted)
+	if err != nil {
 		return nil, err
 	}
 	return token, nil

@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetToken(ctx context.Context, username string) (Session, error)
 	LoginUser(ctx context.Context, username string) (User, error)
 }
 

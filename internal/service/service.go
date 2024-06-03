@@ -7,6 +7,6 @@ import (
 
 type User interface {
 	CreateUser(ctx context.Context, param usermodel.RegisterUser) (*usermodel.User, error)
-	LoginUser(ctx context.Context, param usermodel.LoginUser) (map[string]string, error)
-	RefreshToken(ctx context.Context, tokenString string) (map[string]string, error)
+	LoginUser(ctx context.Context, param usermodel.LoginUser) (*usermodel.Token, error)
+	RefreshToken(ctx context.Context, tokenString string) (*usermodel.Token, error)
 }
