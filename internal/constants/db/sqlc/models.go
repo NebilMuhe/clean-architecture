@@ -8,6 +8,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Session struct {
+	ID           pgtype.UUID        `json:"id"`
+	Username     string             `json:"username"`
+	RefreshToken string             `json:"refresh_token"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	DeletedAt    pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type User struct {
 	ID        pgtype.UUID        `json:"id"`
 	Username  string             `json:"username"`

@@ -1,6 +1,11 @@
 package helpers
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
+	"io"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -121,4 +126,45 @@ func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
 	}
 
 	return map[string]string{"id": id, "username": username}, nil
+}
+
+func Encrypt(key []byte, token string) (string, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	ciphertext := make([]byte, aes.BlockSize+len(token))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], []byte(token))
+
+	return base64.URLEncoding.EncodeToString(ciphertext), nil
+}
+
+func Decrypt(key []byte, token string) (string, error) {
+	ciphertext, err := base64.URLEncoding.DecodeString(token)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	if len(ciphertext) < aes.BlockSize {
+		return "", err
+	}
+	iv := ciphertext[:aes.BlockSize]
+	ciphertext = ciphertext[aes.BlockSize:]
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(ciphertext, ciphertext)
+
+	return string(ciphertext), nil
 }

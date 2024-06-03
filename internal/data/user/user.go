@@ -67,6 +67,21 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 	}, nil
 }
 
-func (u *user) RefreshToken(ctx context.Context, username string, refToken string) (map[string]string, error) {
-	return nil, nil
+func (u *user) RefreshToken(ctx context.Context, username string, refToken string) (*usermodel.RefreshToken, error) {
+	arg := db.CreateSessionParams{
+		Username:     username,
+		RefreshToken: refToken,
+	}
+	session, err := u.db.CreateSession(ctx, arg)
+	if err != nil {
+		u.log.Error(ctx, "unable to create session", zap.Error(err))
+		err := errors.ErrWriteError.Wrap(err, "unable to create")
+		return nil, err
+	}
+	return &usermodel.RefreshToken{
+		ID:           session.ID.Bytes,
+		Username:     session.Username,
+		RefreshToken: session.RefreshToken,
+		CreatedAt:    session.CreatedAt.Time,
+	}, nil
 }

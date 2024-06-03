@@ -63,6 +63,7 @@ func Initialize(ctx context.Context) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	signal.Notify(quit, syscall.SIGTERM)
+	signal.Notify(quit, syscall.SIGINT)
 
 	go func() {
 		log.Info(ctx, "started listening on server with ", zap.Int("port", viper.GetInt("server.port")))

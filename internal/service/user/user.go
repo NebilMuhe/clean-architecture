@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -66,6 +67,16 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (map[st
 	if err != nil {
 		u.log.Error(ctx, "unable to create token", zap.Error(err))
 		err = errors.ErrWriteError.Wrap(err, "unable to create token")
+		return nil, err
+	}
+
+	rfEncrypted, err := helpers.Encrypt([]byte(viper.GetString("secret_key")), token["refresh_token"])
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = u.data.RefreshToken(ctx, param.Username, rfEncrypted)
+	if err != nil {
 		return nil, err
 	}
 

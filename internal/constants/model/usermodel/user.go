@@ -40,6 +40,13 @@ type LoginUser struct {
 	Password string `json:"password,omitempty"`
 }
 
+type RefreshToken struct {
+	ID           uuid.UUID `json:"id"`
+	Username     string    `json:"username,omitempty"`
+	RefreshToken string    `json:"refresh_token,omitempty"`
+	CreatedAt    time.Time `json:"created_at,omitempty"`
+}
+
 var usernameRule = []validation.Rule{
 	validation.Required.Error("username required"),
 	validation.Length(5, 20).Error("Username length must be atleast 5 characters"),
