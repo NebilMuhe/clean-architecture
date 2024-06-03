@@ -8,6 +8,7 @@ import (
 	"clean-architecture/internal/service"
 	"clean-architecture/utils/logger"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -66,4 +67,29 @@ func (u *user) LoginUser(ctx *gin.Context) {
 	}
 
 	constants.SuccessResponse(ctx, http.StatusOK, res, nil)
+}
+
+func (u *user) RefreshToken(ctx *gin.Context) {
+	authorization := ctx.Request.Header.Get("Authorization")
+	if authorization == "" || !strings.HasPrefix(authorization, "Bearer ") {
+		err := errors.ErrInvalidUserInput.New("invalid input")
+		u.log.Error(ctx, "invalid token", zap.Error(err))
+		ctx.Error(err)
+		return
+	}
+
+	tokenString := authorization[len("Bearer "):]
+	if tokenString == "" {
+		err := errors.ErrInvalidUserInput.New("invalid input")
+		u.log.Error(ctx, "invalid token", zap.Error(err))
+		return
+	}
+
+	token, err := u.service.RefreshToken(ctx, tokenString)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	constants.SuccessResponse(ctx, http.StatusOK, token, nil)
 }

@@ -74,3 +74,51 @@ func GenerateRefreshToken(id, username string) (string, error) {
 
 	return rt, nil
 }
+
+func VerifyToken(tokenString string) error {
+	secretKey := []byte(viper.GetString("SECRET_KEY"))
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !token.Valid {
+		return err
+	}
+
+	return nil
+}
+
+func ExtractUsernameAndID(tokenString string) (map[string]string, error) {
+	secretKey := []byte(viper.GetString("secret_key"))
+	var err error
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, err
+		}
+
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var username string
+	var id string
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if _, ok := claims["sub"]; ok {
+			if int(claims["sub"].(float64)) == 1 {
+				id = claims["id"].(string)
+				username = claims["username"].(string)
+			}
+		} else {
+			return nil, err
+		}
+	}
+
+	return map[string]string{"id": id, "username": username}, nil
+}

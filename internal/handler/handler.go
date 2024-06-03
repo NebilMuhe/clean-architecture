@@ -7,4 +7,5 @@ import (
 type User interface {
 	CreateUser(ctx *gin.Context)
 	LoginUser(ctx *gin.Context)
+	RefreshToken(ctx *gin.Context)
 }

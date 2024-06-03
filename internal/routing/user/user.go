@@ -21,6 +21,11 @@ func InitRoute(grp *gin.RouterGroup, user handler.User) {
 			Method:  http.MethodPost,
 			Handler: user.LoginUser,
 		},
+		{
+			Path:    "/refresh",
+			Method:  http.MethodPost,
+			Handler: user.RefreshToken,
+		},
 	}
 
 	routing.RegisterRoutes(users, userRoutes)

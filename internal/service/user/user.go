@@ -71,3 +71,27 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (map[st
 
 	return token, nil
 }
+
+func (u *user) RefreshToken(ctx context.Context, tokenString string) (map[string]string, error) {
+	err := helpers.VerifyToken(tokenString)
+	if err != nil {
+		u.log.Error(ctx, "invalid token", zap.Error(err))
+		err := errors.ErrInvalidUserInput.Wrap(err, "invalid token")
+		return nil, err
+	}
+
+	res, err := helpers.ExtractUsernameAndID(tokenString)
+	if err != nil {
+		u.log.Error(ctx, "unable to extract username and id", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
+		return nil, err
+	}
+
+	token, err := helpers.CreateToken(res["id"], res["username"])
+	if err != nil {
+		u.log.Error(ctx, "unable to create token", zap.Error(err))
+		err = errors.ErrWriteError.Wrap(err, "unable to create token")
+		return nil, err
+	}
+	return token, nil
+}

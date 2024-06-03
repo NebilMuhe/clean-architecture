@@ -66,3 +66,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 		Password: usr.Password,
 	}, nil
 }
+
+func (u *user) RefreshToken(ctx context.Context, username string, refToken string) (map[string]string, error) {
+	return nil, nil
+}
