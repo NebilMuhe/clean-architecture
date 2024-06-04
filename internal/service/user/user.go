@@ -66,7 +66,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 	}
 
 	if isLoggedIn {
-		err := errors.ErrDataExists.Wrap(err, "user already logged in")
+		err := errors.ErrDataExists.New("user already logged in")
 		u.log.Error(ctx, "user already logged in", zap.Error(err))
 		return nil, err
 	}
