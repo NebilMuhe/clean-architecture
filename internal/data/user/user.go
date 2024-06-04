@@ -123,3 +123,13 @@ func (u *user) DeleteRefreshToken(ctx context.Context, username string) (*usermo
 		Username: usr.Username,
 	}, nil
 }
+
+func (u *user) IsLoggedIn(ctx context.Context, username string) (bool, error) {
+	isLoggedIn, err := u.db.IsLoggedIn(ctx, username)
+	if err != nil {
+		u.log.Error(ctx, "unable to check", zap.Error(err))
+		err := errors.ErrReadError.Wrap(err, "unable to read")
+		return isLoggedIn, err
+	}
+	return isLoggedIn, nil
+}

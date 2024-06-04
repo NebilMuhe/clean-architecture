@@ -22,8 +22,6 @@ WHERE username = $1 OR email = $2
 LIMIT 1
 );
 
-
-
 -- name: CreateSession :one
 INSERT INTO sessions (
   username,
@@ -43,3 +41,11 @@ UPDATE sessions
 SET deleted_at = NOW() 
 WHERE username = $1
 RETURNING *;
+
+-- name: IsLoggedIn :one
+SELECT EXISTS(
+SELECT *
+FROM sessions
+WHERE username = $1 AND deleted_at ISNULL
+LIMIT 1
+);

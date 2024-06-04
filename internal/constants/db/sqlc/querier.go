@@ -14,6 +14,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteRefreshToken(ctx context.Context, username string) (Session, error)
 	GetToken(ctx context.Context, username string) (Session, error)
+	IsLoggedIn(ctx context.Context, username string) (bool, error)
 	LoginUser(ctx context.Context, username string) (User, error)
 }
 

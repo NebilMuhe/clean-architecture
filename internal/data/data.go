@@ -12,4 +12,5 @@ type User interface {
 	GetRefreshToken(ctx context.Context, username string) (string, error)
 	IsUserExists(ctx context.Context, username, email string) (bool, error)
 	DeleteRefreshToken(ctx context.Context, username string) (*usermodel.User, error)
+	IsLoggedIn(ctx context.Context, username string) (bool, error)
 }

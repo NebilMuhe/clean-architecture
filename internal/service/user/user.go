@@ -60,6 +60,17 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 		return nil, err
 	}
 
+	isLoggedIn, err := u.data.IsLoggedIn(ctx, param.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	if isLoggedIn {
+		err := errors.ErrDataExists.Wrap(err, "user already logged in")
+		u.log.Error(ctx, "user already logged in", zap.Error(err))
+		return nil, err
+	}
+
 	usr, err := u.data.LoginUser(ctx, param)
 	if err != nil {
 		return nil, err

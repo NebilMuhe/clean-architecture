@@ -129,6 +129,22 @@ func (q *Queries) GetToken(ctx context.Context, username string) (Session, error
 	return i, err
 }
 
+const isLoggedIn = `-- name: IsLoggedIn :one
+SELECT EXISTS(
+SELECT id, username, refresh_token, created_at, deleted_at
+FROM sessions
+WHERE username = $1 AND deleted_at ISNULL
+LIMIT 1
+)
+`
+
+func (q *Queries) IsLoggedIn(ctx context.Context, username string) (bool, error) {
+	row := q.db.QueryRow(ctx, isLoggedIn, username)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const loginUser = `-- name: LoginUser :one
 SELECT id, username, email, password, created_at, updated_at, deleted_at
 FROM users
