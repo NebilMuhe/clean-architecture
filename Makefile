@@ -8,4 +8,6 @@ migrate-up:
 	migrate -database ${COCKROACHDB_URL} -path db/migration up
 migrate-down:
 	migrate -database ${COCKROACHDB_URL} -path db/migration down
-.PHONY: sqlc migrate-up migrate-down
+godog:
+	godog run test/features/register.feature
+.PHONY: sqlc migrate-up migrate-down godog
