@@ -20,11 +20,11 @@ jobs:
           - 8080:8080
         # options: --env=COCKROACH_DATABASE=mydb --env=COCKROACH_USER=root --env=COCKROACH_INSECURE=true
         # Set the health check to wait until CockroachDB is ready
-        healthcheck:
-          test: ["CMD-SHELL", "nc -z localhost 26257"]
-          interval: 10s
-          timeout: 5s
-          retries: 5
+        # healthcheck:
+        #   test: ["CMD-SHELL", "nc -z localhost 26257"]
+        #   interval: 10s
+        #   timeout: 5s
+        #   retries: 5
 
     steps:
       - name: Checkout code
