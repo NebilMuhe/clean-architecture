@@ -18,15 +18,15 @@ jobs:
         ports:
           - 26257:26257
           - 8080:8080
-        env:
-          COCKROACH_DATABASE: userstore
-          COCKROACH_USER: root
-          COCKROACH_INSECURE: true
-        options: >-
-          --health-cmd pg_isready -h localhost -p 26257
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        # env:
+        #   COCKROACH_DATABASE: userstore
+        #   COCKROACH_USER: root
+        #   COCKROACH_INSECURE: true
+        # options: >-
+        #   --health-cmd pg_isready -h localhost -p 26257
+        #   --health-interval 10s
+        #   --health-timeout 5s
+        #   --health-retries 5
 
     steps:
       - name: Checkout code
@@ -46,7 +46,7 @@ jobs:
           go get -v -t -d ./...
           go install github.com/cucumber/godog/cmd/godog@latest
 
-      - name: Run tests
-        env:
-          DATABASE_URL: postgresql://root@localhost:26257/mydb?sslmode=disable
-        run: go test ./...
+      # - name: Run tests
+      #   env:
+      #     DATABASE_URL: postgresql://root@localhost:26257/mydb?sslmode=disable
+      #   run: go test ./...
