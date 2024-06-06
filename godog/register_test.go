@@ -15,6 +15,7 @@ import (
 	"github.com/cucumber/godog"
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/spf13/viper"
 )
 
@@ -29,13 +30,14 @@ type User struct {
 }
 
 var server *gin.Engine
+var pool *pgxpool.Pool
 
 func IntializeTest() {
 	ctx := context.Background()
 	log := initiator.InitLogger()
 	initiator.InitConfig(ctx, "config", "../config", log)
 	log.Info(ctx, "initializing database")
-	pool := initiator.InitDB(ctx, viper.GetString("database.url"), log)
+	pool = initiator.InitDB(ctx, viper.GetString("database.url"), log)
 	log.Info(ctx, "initilaizied database")
 
 	log.Info(ctx, "initializing persistence layer")
@@ -63,7 +65,7 @@ func IntializeTest() {
 }
 
 func (u *UserTestState) reset() {
-
+	pool.Exec(context.Background(), "DELETE FROM users;")
 }
 
 func (u *UserTestState) userIsOnRegistrationPage() error {
@@ -105,6 +107,31 @@ func (u *UserTestState) theSystemSholudReturn(err string) error {
 	return godog.ErrPending
 }
 
+func (u *UserTestState) iSendRequestToWithPayload(method, url string, body *godog.DocString) error {
+	req := httptest.NewRequest(method, url, bytes.NewReader([]byte(body.Content)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	server.ServeHTTP(w, req)
+
+	response := model.Response{}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		return err
+	}
+
+	if response.Error != nil {
+		u.errorMessage = response.Error.Message
+	}
+	return nil
+}
+
+func (u *UserTestState) theResponseShouldBe(err string) error {
+	if u.errorMessage == err {
+		return nil
+	}
+	return godog.ErrPending
+}
+
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	ts := &UserTestState{}
 
@@ -114,12 +141,16 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	})
 
 	ctx.After(func(ctx context.Context, sc *godog.Scenario, err error) (context.Context, error) {
+		ts.reset()
 		return ctx, nil
 	})
 
 	ctx.Step(`^The system sholud return "([^"]*)"$`, ts.theSystemSholudReturn)
 	ctx.Step(`^User enters "([^"]*)",""([^"]*)"", and "([^"]*)"$`, ts.userEntersAnd)
-	ctx.Step(`^User is on registre page$`, ts.userIsOnRegistrationPage)
+	ctx.Step(`^User is on registration page$`, ts.userIsOnRegistrationPage)
+
+	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" with payload:$`, ts.iSendRequestToWithPayload)
+	ctx.Step(`^the response should be "([^"]*)"$`, ts.theResponseShouldBe)
 }
 
 func IntializeTestSuite(sc *godog.TestSuiteContext) {

@@ -1,7 +1,7 @@
 Feature: Register User
 
     Scenario: validate user input
-        Given User is on registre page
+        Given User is on registration page
         When User enters "<Username>","<Email>", and "<Password>"
         Then The system sholud return "<ErrorMessage>"
         Examples:
@@ -17,4 +17,19 @@ Feature: Register User
         | david      | "dave@gmail.com"      | 1234ABCD        | Password must contain atleast one uppercase letters,one lowercase letters, digits and special characters     |
         | david      | "dave@gmail.com"      | 12ABCDab        | Password must contain atleast one uppercase letters,one lowercase letters, digits and special characters     |
         | david1     | "dave@gmail.com"      | 12ABCD%$        | Password must contain atleast one uppercase letters,one lowercase letters, digits and special characters     |
-       # | testuser   | "testuser@gmail.com"  | 12ABcd%$        |                         |  
+
+    Scenario: user already registered
+        Given User is on registration page
+        When I send "POST" request to "/api/v1/users/register" with payload:
+        """
+            {
+                "username": "abebe","email": "abebe@gmail.com","password": "12ABCD%$ab"
+            }
+        """
+        And I send "POST" request to "/api/v1/users/register" with payload:
+        """
+            {
+                "username": "abebe","email": "abebe@gmail.com","password": "12ABCD%$ab"
+            }
+        """
+        Then the response should be "user already exists"

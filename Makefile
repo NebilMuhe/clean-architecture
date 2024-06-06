@@ -9,7 +9,7 @@ migrate-up:
 migrate-down:
 	migrate -database ${COCKROACHDB_URL} -path db/migration down
 godog-run:
-	godog run godog/features/register.feature
+	godog run godog/features/register_form_validation.feature
 godog-test:
 	godog test godog/tests/register_test.go
 .PHONY: sqlc migrate-up migrate-down godog-run godog-test
