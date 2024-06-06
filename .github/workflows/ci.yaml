@@ -59,17 +59,17 @@ jobs:
           go get -v -t -d ./...
           go install github.com/cucumber/godog/cmd/godog@latest
 
-      - name: Wait for CockroachDB to be ready
-        run: |
-          until docker inspect --format '{{json .State.Health.Status}}' ${{job.services.cockroachdb.id}} | grep -q '"healthy"'; do
-            echo "Waiting for CockroachDB...";
-            sleep 5;
-          done
-        shell: bash
+      # - name: Wait for CockroachDB to be ready
+      #   run: |
+      #     until docker inspect --format '{{json .State.Health.Status}}' ${{job.services.cockroachdb.id}} | grep -q '"healthy"'; do
+      #       echo "Waiting for CockroachDB...";
+      #       sleep 5;
+      #     done
+      #   shell: bash
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://root@localhost:26257/mydb?sslmode=disable
+          DATABASE_URL: postgresql://root@localhost:26257/userstore?sslmode=disable
         run: go test ./...
 
       - name: Run GoDog tests
