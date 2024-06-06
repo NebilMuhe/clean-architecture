@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -21,6 +22,7 @@ import (
 
 type UserTestState struct {
 	errorMessage string
+	isRegistered bool
 }
 
 type User struct {
@@ -121,12 +123,22 @@ func (u *UserTestState) iSendRequestToWithPayload(method, url string, body *godo
 
 	if response.Error != nil {
 		u.errorMessage = response.Error.Message
+	} else {
+		u.isRegistered = response.OK
 	}
 	return nil
 }
 
 func (u *UserTestState) theResponseShouldBe(err string) error {
 	if u.errorMessage == err {
+		return nil
+	}
+	return godog.ErrPending
+}
+
+func (u *UserTestState) theSystemReturnABoolean(isRegistered string) error {
+	value, _ := strconv.ParseBool(isRegistered)
+	if u.isRegistered == value {
 		return nil
 	}
 	return godog.ErrPending
@@ -151,6 +163,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" with payload:$`, ts.iSendRequestToWithPayload)
 	ctx.Step(`^the response should be "([^"]*)"$`, ts.theResponseShouldBe)
+
+	ctx.Step(`^the system return a boolean "([^"]*)"$`, ts.theSystemReturnABoolean)
 }
 
 func IntializeTestSuite(sc *godog.TestSuiteContext) {

@@ -33,3 +33,12 @@ Feature: Register User
             }
         """
         Then the response should be "user already exists"
+    Scenario: Successful user registration
+        Given User is on registration page
+        When I send "POST" request to "/api/v1/users/register" with payload:
+        """
+            {
+                "username": "abebe","email": "abebe@gmail.com","password": "12ABCD%$ab"
+            }
+        """
+        Then the system return a boolean "true"
