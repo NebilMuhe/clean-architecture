@@ -37,13 +37,13 @@ jobs:
       #     restore-keys: |
       #       ${{ runner.os }}-go-
 
-      - name: Make Migration
-        run: make migrate-up
-
       - name: Install dependencies
         run: |
           go get -v -t -d ./...
           go install github.com/cucumber/godog/cmd/godog@latest
+
+      - name: Make Migration
+        run: make migrate-up
 
       - name: Run GoDog tests
         env:
