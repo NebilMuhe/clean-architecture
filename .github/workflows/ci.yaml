@@ -15,10 +15,13 @@ jobs:
     services:
       cockroachdb:
         image: cockroachdb/cockroach:latest
-        command: start-single-node --insecure
+        # command: start-single-node --insecure
         ports:
           - 26257:26257
           - 8080:8080
+        options: >-
+          --start-single-node 
+          --insecure
         # options: >-
         #   --env=COCKROACH_DATABASE=mydb
         #   --env=COCKROACH_USER=root
