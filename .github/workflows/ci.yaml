@@ -27,7 +27,7 @@ jobs:
           go install github.com/cucumber/godog/cmd/godog@latest
 
       - name: Run tests
-        run: go test -v ../../godog/tests
+        run: go test ./...
 
       - name: Run GoDog tests
         run: godog
