@@ -19,16 +19,16 @@ jobs:
         ports:
           - 26257:26257
           - 8080:8080
-        options: >-
-          --start-single-node --insecure
         # options: >-
-        #   --env=COCKROACH_DATABASE=mydb
-        #   --env=COCKROACH_USER=root
-        #   --env=COCKROACH_INSECURE=true
-        #   --health-cmd=pg_isready -h localhost -p 26257
-        #   --health-interval=10s
-        #   --health-timeout=5s
-        #   --health-retries=5
+        #   --start-single-node --insecure
+        options: >-
+          --env=COCKROACH_DATABASE=mydb
+          --env=COCKROACH_USER=root
+          --env=COCKROACH_INSECURE=true
+          --health-cmd= start-single-node --insecure
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout code
