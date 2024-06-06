@@ -14,7 +14,7 @@ jobs:
 
     services:
       cockroachdb:
-        image: cockroachdb/cockroach:v21.1.8
+        image: cockroachdb/cockroach:latest
         ports:
           - 26257:26257
           - 8080:8080
