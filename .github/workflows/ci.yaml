@@ -15,13 +15,18 @@ jobs:
     services:
       cockroachdb:
         image: cockroachdb/cockroach:latest
+         command: start-single-node --insecure
         ports:
           - 26257:26257
           - 8080:8080
-        options: >-
-          --env=COCKROACH_DATABASE=mydb
-          --env=COCKROACH_USER=root
-          --env=COCKROACH_INSECURE=true
+        # options: >-
+        #   --env=COCKROACH_DATABASE=mydb
+        #   --env=COCKROACH_USER=root
+        #   --env=COCKROACH_INSECURE=true
+        #   --health-cmd=pg_isready -h localhost -p 26257
+        #   --health-interval=10s
+        #   --health-timeout=5s
+        #   --health-retries=5
     volumes:
       - cockroach-data:/cockroach/cockroach-data
 
@@ -69,6 +74,3 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.45.0
           golangci-lint run
-
-volumes:
-  cockroach-data:
