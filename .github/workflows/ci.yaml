@@ -12,23 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # services:
-    #   cockroachdb:
-    #     image: cockroachdb/cockroach:latest
-    # command: start-single-node --insecure
-    # ports:
-    #   - 26257:26257
-    #   - 8080:8080
-    # options: --entrypoint "/cockroach/cockroach.sh start-single-node --insecure"
-    # options: >-
-    #   --env=COCKROACH_DATABASE=mydb
-    #   --env=COCKROACH_USER=root
-    #   --env=COCKROACH_INSECURE=true
-    #   --health-cmd= start-single-node --insecure
-    #   --health-interval=10s
-    #   --health-timeout=5s
-    #   --health-retries=5
-
     steps:
       - name: Start a single CockroachDB instance with docker
         run: |
@@ -39,45 +22,30 @@ jobs:
           docker exec roach bash -c 'echo "CREATE DATABASE userstore;" | cockroach sql --insecure'
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: "1.22.1"
 
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+      # - name: Cache Go modules
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/go/pkg/mod
+      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-go-
+
+      - name: Make Migration
+        run: make migrate-up
 
       - name: Install dependencies
         run: |
           go get -v -t -d ./...
           go install github.com/cucumber/godog/cmd/godog@latest
 
-      # - name: Wait for CockroachDB to be ready
-      #   run: |
-      #     until docker inspect --format '{{json .State.Health.Status}}' ${{job.services.cockroachdb.id}} | grep -q '"healthy"'; do
-      #       echo "Waiting for CockroachDB...";
-      #       sleep 5;
-      #     done
-      #   shell: bash
-
-      # - name: Run tests
-      #   env:
-      #     DATABASE_URL: postgresql://root@localhost:26257/userstore?sslmode=disable
-      #   run: go test ./...
-
       - name: Run GoDog tests
         env:
           DATABASE_URL: postgresql://root@localhost:26257/mydb?sslmode=disable
         run: make test
-
-      # - name: Run GolangCI-Lint
-      #   run: |
-      #     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.45.0
-      #     golangci-lint run
