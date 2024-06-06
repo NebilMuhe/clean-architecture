@@ -36,6 +36,10 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.22.1"
+      - name: Install CockroachDB
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cockroachdb
 
       - name: Start CockroachDB single-node cluster
         run: |
