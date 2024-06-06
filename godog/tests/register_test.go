@@ -37,7 +37,7 @@ var pool *pgxpool.Pool
 func IntializeTest() {
 	ctx := context.Background()
 	log := initiator.InitLogger()
-	initiator.InitConfig(ctx, "config", "../config", log)
+	initiator.InitConfig(ctx, "config", "../../config", log)
 	log.Info(ctx, "initializing database")
 	pool = initiator.InitDB(ctx, viper.GetString("database.url"), log)
 	log.Info(ctx, "initilaizied database")
@@ -183,7 +183,7 @@ func TestFeautres(t *testing.T) {
 		TestSuiteInitializer: IntializeTestSuite,
 		Options: &godog.Options{
 			Format:   "pretty",
-			Paths:    []string{"features"},
+			Paths:    []string{"../features"},
 			TestingT: t, // Testing instance that will run subtests.
 		},
 	}

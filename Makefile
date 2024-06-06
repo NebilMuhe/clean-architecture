@@ -12,4 +12,6 @@ godog-run:
 	godog run godog/features/register_form_validation.feature
 godog-test:
 	godog test godog/tests/register_test.go
+test:
+	go test -v ./godog/tests
 .PHONY: sqlc migrate-up migrate-down godog-run godog-test
