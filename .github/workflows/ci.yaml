@@ -37,6 +37,10 @@ jobs:
         with:
           go-version: "1.22.1"
 
+      - name: Start CockroachDB single-node cluster
+        run: |
+          cockroach start-single-node --insecure --background --listen-addr=localhost
+
       - name: Install dependencies
         run: |
           go get -v -t -d ./...
