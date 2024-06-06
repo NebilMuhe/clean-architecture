@@ -12,14 +12,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      cockroachdb:
-        image: cockroachdb/cockroach:latest
+    # services:
+    #   cockroachdb:
+    #     image: cockroachdb/cockroach:latest
         # command: start-single-node --insecure
-        ports:
-          - 26257:26257
-          - 8080:8080
-        options: --entrypoint "/cockroach/cockroach.sh start-single-node --insecure"
+        # ports:
+        #   - 26257:26257
+        #   - 8080:8080
+        # options: --entrypoint "/cockroach/cockroach.sh start-single-node --insecure"
         # options: >-
         #   --env=COCKROACH_DATABASE=mydb
         #   --env=COCKROACH_USER=root
@@ -30,6 +30,14 @@ jobs:
         #   --health-retries=5
 
     steps:
+      - name: Start a single CockroachDB instance with docker
+          run: |
+            docker pull cockroachdb/cockroach:latest
+            docker run -d --name roach --hostname roach -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start-single-node --insecure
+            sudo apt update && sudo apt install wait-for-it -y
+            wait-for-it -h localhost -p 26257
+            docker exec roach bash -c 'echo "CREATE DATABASE userstore;" | cockroach sql --insecure'
+
       - name: Checkout code
         uses: actions/checkout@v2
 
