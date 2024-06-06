@@ -18,7 +18,7 @@ jobs:
         ports:
           - 26257:26257
           - 8080:8080
-        # options: --env=COCKROACH_DATABASE=mydb --env=COCKROACH_USER=root --env=COCKROACH_INSECURE=true
+        options: --env=COCKROACH_DATABASE=mydb --env=COCKROACH_USER=root --env=COCKROACH_INSECURE=true
         # Set the health check to wait until CockroachDB is ready
         # healthcheck:
         #   test: ["CMD-SHELL", "nc -z localhost 26257"]
