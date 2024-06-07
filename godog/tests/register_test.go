@@ -169,6 +169,10 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the response should be "([^"]*)"$`, ts.theResponseShouldBe)
 
 	ctx.Step(`^the system return a boolean "([^"]*)"$`, ts.theSystemReturnABoolean)
+
+	ctx.Step(`^User enters "([^"]*)" and "([^"]*)"$`, ts.userEntersUsernameAndPassword)
+	ctx.Step(`^User is on login page$`, ts.userIsOnLoginPage)
+	ctx.Step(`^The system sholud return an error "([^"]*)"$`, ts.theSystemSholudReturnAnError)
 }
 
 func IntializeTestSuite(sc *godog.TestSuiteContext) {
