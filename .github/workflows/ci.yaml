@@ -19,7 +19,7 @@ jobs:
           docker run -d --name roach --hostname roach -p 26257:26257 -p 8080:8080 cockroachdb/cockroach:latest start-single-node --insecure
           sudo apt update && sudo apt install wait-for-it -y
           wait-for-it -h localhost -p 26257
-          docker exec roach bash -c 'echo "CREATE DATABASE userstore;" | cockroach sql --insecure'
+          docker exec roach bash -c 'echo "CREATE DATABASE userstore;" | cockroach sql --insecure | echo "CREATE TABLE users;"'
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,8 +37,8 @@ jobs:
       # - name: Make Migration
       #   run: make migrate-up
 
-      - name: Run migration
-        run: make run
+      # - name: Run migration
+      #   run: make run
 
       - name: Run GoDog tests
         env:
