@@ -16,3 +16,13 @@ Feature: Login User
         | david      | 12ABCDab              | Password must contain atleast one uppercase letters,one lowercase letters, digits and special characters  |
         | david1     | 12ABCD%$              | Password must contain atleast one uppercase letters,one lowercase letters, digits and special characters  |
         
+    Scenario: Not registered user
+        Given User is on login page
+        When I send "POST" request to "/api/v1/users/login" with payload:
+        """
+        {
+            "username": "abebe",
+            "password": "12ABCD%$ab"
+        }   
+        """
+        Then The system sholud return an error "invalid credential"
