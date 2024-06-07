@@ -42,9 +42,9 @@ func IntializeTest() {
 	pool = initiator.InitDB(ctx, viper.GetString("database.url"), log)
 	log.Info(ctx, "initilaizied database")
 
-	// log.Info(ctx, "initializing migration")
-	// initiator.InitMigration(ctx, viper.GetString("database.file"), viper.GetString("database.murl"), log)
-	// log.Info(ctx, "initialized migration")
+	log.Info(ctx, "initializing migration")
+	initiator.InitMigration(ctx, viper.GetString("database.testPath"), viper.GetString("database.murl"), log)
+	log.Info(ctx, "initialized migration")
 
 	log.Info(ctx, "initializing persistence layer")
 	persitence := initiator.InitPersistence(dbinstance.New(pool), log)

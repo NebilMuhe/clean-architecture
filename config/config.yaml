@@ -1,6 +1,7 @@
 database:
   url: postgresql://root:@localhost:26257/userstore?sslmode=disable
   file: file://internal/constants/db/migration
+  testPath: file://../../internal/constants/db/migration
   murl: cockroachdb://root:@localhost:26257/userstore?sslmode=disable
 server:
   port: 8000
