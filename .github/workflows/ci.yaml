@@ -29,21 +29,16 @@ jobs:
         with:
           go-version: "1.22.1"
 
-      # - name: Cache Go modules
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/go/pkg/mod
-      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-go-
-
       - name: Install dependencies
         run: |
           go get -v -t -d ./...
           go install github.com/cucumber/godog/cmd/godog@latest
 
-      - name: Make Migration
-        run: make migrate-up
+      # - name: Make Migration
+      #   run: make migrate-up
+
+      - name: Run migration
+        run: make run
 
       - name: Run GoDog tests
         env:
