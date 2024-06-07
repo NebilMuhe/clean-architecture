@@ -9,7 +9,7 @@ migrate-up:
 migrate-down:
 	migrate -database ${COCKROACHDB_URL} -path internal/constants/db/migration down
 godog-run:
-	godog run godog/features/register_form_validation.feature
+	godog run godog/features/
 godog-test:
 	godog test godog/tests/register_test.go
 test:
