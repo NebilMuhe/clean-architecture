@@ -33,7 +33,7 @@ func CheckPassword(ctx context.Context, hash, providedPassword string, log logge
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(providedPassword))
 	if err != nil {
 		log.Error(ctx, "invalid password", zap.Error(err))
-		errors.ErrInvalidUserInput.Wrap(err, "invalid input")
+		err = errors.ErrInvalidUserInput.Wrap(err, "invalid input")
 		return err
 	}
 	return nil

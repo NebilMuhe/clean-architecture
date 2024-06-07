@@ -52,7 +52,7 @@ func (u *user) LoginUser(ctx context.Context, param usermodel.LoginUser) (*userm
 	if err != nil {
 		u.log.Error(ctx, "unable to login", zap.Error(err), zap.String("username", param.Username))
 		if err == pgx.ErrNoRows {
-			err = errors.ErrNoRecordFound.Wrap(err, "invalid credential")
+			err = errors.ErrNoRecordFound.Wrap(err, "user does not exist")
 		} else {
 			err = errors.ErrReadError.Wrap(err, "unable to login")
 		}

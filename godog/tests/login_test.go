@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"clean-architecture/internal/constants/model"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -42,6 +43,7 @@ func (u *UserTestState) userEntersUsernameAndPassword(username, password string)
 }
 
 func (u *UserTestState) theSystemSholudReturnAnError(err string) error {
+	fmt.Println("error message", u.errorMessage)
 	if u.errorMessage == err {
 		return nil
 	}
