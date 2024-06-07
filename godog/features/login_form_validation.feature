@@ -27,7 +27,7 @@ Feature: Login User
         """
         Then The system sholud return an error "user does not exist"
     
-    Scenario: Invalid Username or Password
+    Scenario: Invalid Password
         Given User is on registration page
         When I send "POST" request to "/api/v1/users/register" with payload:
         """
@@ -42,3 +42,19 @@ Feature: Login User
             }
         """
         Then The system sholud return an error "invalid input"
+
+    Scenario: On Successful login
+        Given User is on registration page
+        When I send "POST" request to "/api/v1/users/register" with payload:
+        """
+            {
+                "username": "abebe","email": "abebe@gmail.com","password": "12ABCD%$ab"
+            }
+        """
+        And I send "POST" request to "/api/v1/users/login" with payload:
+        """
+            {
+                "username": "abebe","password": "12ABCD%$ab"
+            }
+        """
+        Then the system return a boolean "true"   
